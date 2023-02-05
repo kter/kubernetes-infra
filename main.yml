@@ -1,4 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ImageId:
+    Type: String
+    Default: ami-068e3d6bc44010346
+  ControllerInstanceType:
+    Type: String
+    Default: t3.micro
 
 Resources:
   VPC:
@@ -159,3 +166,33 @@ Resources:
             #    FromPort: 80
             #    ToPort: 80
             #    CidrIp: 0.0.0.0/0
+  KeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: kubernetes-key-pair
+
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref ControllerInstance
+
+  ControllerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+        #KeyName: !Ref KeyPair
+      InstanceType: !Ref ControllerInstanceType
+      SecurityGroups:
+        - !Ref SecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 16
+      PrivateIpAddress: 10.1.0.254
+      UserData: !Base64 "name=controller-1"
+      SubnetId: !Ref PublicSubnetA
+      SourceDestCheck: false
+      Tags:
+        - Key: "Name"
+          Value: "controller-1"
+
