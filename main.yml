@@ -145,6 +145,8 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: all
           CidrIp: 10.1.0.0/16
+        - IpProtocol: all
+          CidrIp: 10.200.0.0/16
         - IpProtocol: tcp
           ToPort: 22
           FromPort: 22
@@ -180,19 +182,45 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref ImageId
-        #KeyName: !Ref KeyPair
+      KeyName: !Ref KeyPair
       InstanceType: !Ref ControllerInstanceType
-      SecurityGroups:
-        - !Ref SecurityGroup
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeSize: 16
-      PrivateIpAddress: 10.1.0.254
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref SecurityGroup
+          SubnetId: !Ref PublicSubnetA
+          PrivateIpAddress: 10.1.0.254
       UserData: !Base64 "name=controller-1"
-      SubnetId: !Ref PublicSubnetA
       SourceDestCheck: false
       Tags:
         - Key: "Name"
           Value: "controller-1"
+
+  WorkerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      KeyName: !Ref KeyPair
+      InstanceType: !Ref ControllerInstanceType
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 16
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref SecurityGroup
+          SubnetId: !Ref PublicSubnetA
+          PrivateIpAddress: 10.1.0.192
+      UserData: !Base64 "name=worker-1|pod-cidr=10.200.1.0/24"
+      SourceDestCheck: false
+      Tags:
+        - Key: "Name"
+          Value: "worker-1"
 
