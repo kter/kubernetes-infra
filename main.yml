@@ -130,3 +130,32 @@ Resources:
       SubnetId: !Ref PrivateSubnetC
       RouteTableId: !Ref PrivateRouteTable
 
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: kubernetes security group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: all
+          CidrIp: 10.1.0.0/16
+        - IpProtocol: tcp
+          ToPort: 22
+          FromPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          ToPort: 6443
+          FromPort: 6443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          ToPort: 443
+          FromPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: icmp
+          ToPort: -1
+          FromPort: -1
+          CidrIp: 0.0.0.0/0
+            #SecurityGroupEgress:
+            #  - IpProtocol: tcp
+            #    FromPort: 80
+            #    ToPort: 80
+            #    CidrIp: 0.0.0.0/0
