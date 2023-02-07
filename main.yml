@@ -201,7 +201,7 @@ Resources:
         - Key: "Name"
           Value: "controller-1"
 
-  WorkerInstance:
+  WorkerInstance1:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref ImageId
@@ -224,3 +224,25 @@ Resources:
         - Key: "Name"
           Value: "worker-1"
 
+  WorkerInstance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      KeyName: !Ref KeyPair
+      InstanceType: !Ref ControllerInstanceType
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 16
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref SecurityGroup
+          SubnetId: !Ref PublicSubnetB
+          PrivateIpAddress: 10.1.0.191
+      UserData: !Base64 "name=worker-2|pod-cidr=10.200.2.0/24"
+      SourceDestCheck: false
+      Tags:
+        - Key: "Name"
+          Value: "worker-2"
